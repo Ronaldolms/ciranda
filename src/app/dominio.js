@@ -1,4 +1,4 @@
-const CHAVE = "ciranda-mvp-v3";
+const CHAVE = "ciranda-mvp-v4";
 const MIN = 60 * 1000;
 const RESERVA_MIN = 30;          // RN08
 const SESSAO_MIN = 30;           // RN25
@@ -89,12 +89,12 @@ function semente() {
     P({ id: "PC14", titulo: "Jaqueta de sarja", marca: "Hering", tamanho: "M", cor: "#8A7A55", corNome: "Cáqui", conservacao: "Bom estado", categoria: "Jaquetas e casacos", preco: 109.9, fornecedor: "F02", situacao: "Vendida" }),
   ];
   const usuarios = [
-    { id: "U01", papel: "Cliente", nome: "Marina Costa", email: "marina@ciranda.app", senha: "ciranda123", endereco: "SQN 210, Bloco C, apto 304, Asa Norte, Brasília, DF, 70862-030", saldoDePontos: 0 },
-    { id: "U02", papel: "Fornecedor", nome: "Ana Ribeiro", email: "ana@ciranda.app", senha: "ciranda123", fornecedor: "F01" },
+    { id: "U01", papel: "Cliente", nome: "Ana Costa", email: "ana@ciranda.app", senha: "ciranda123", endereco: "SQN 210, Bloco C, apto 304, Asa Norte, Brasília, DF, 70862-030", saldoDePontos: 0 },
+    { id: "U02", papel: "Fornecedor", nome: "Beatriz Ribeiro", email: "beatriz@ciranda.app", senha: "ciranda123", fornecedor: "F01" },
     { id: "U03", papel: "Administradora", nome: "Lúcia Andrade", email: "lucia@ciranda.app", senha: "ciranda123" },
   ];
   const fornecedores = [
-    { id: "F01", nome: "Ana Ribeiro", contato: "ana@ciranda.app", cidade: "Brasília, DF", ativo: true },
+    { id: "F01", nome: "Beatriz Ribeiro", contato: "beatriz@ciranda.app", cidade: "Brasília, DF", ativo: true },
     { id: "F02", nome: "Brechó Dona Célia", contato: "celia@donacelia.com.br", cidade: "Taguatinga, DF", ativo: true },
   ];
   const consignacoes = [

@@ -95,8 +95,8 @@ function telaLogin(modo = "entrar") {
       <h2>Entrar</h2>
       <p class="mudo" style="margin:6px 0 4px">Escolha um perfil de demonstração. Senha de todos: <strong>ciranda123</strong>.</p>
       <div class="perfis entra-lista">
-        ${[["marina@ciranda.app", "Marina Costa", "Cliente", "Compra, paga no Pix e junta pontos"],
-           ["ana@ciranda.app", "Ana Ribeiro", "Fornecedor", "Publica peças em consignação"],
+        ${[["ana@ciranda.app", "Ana Costa", "Cliente", "Compra, paga no Pix e junta pontos"],
+           ["beatriz@ciranda.app", "Beatriz Ribeiro", "Fornecedor", "Publica peças em consignação"],
            ["lucia@ciranda.app", "Lúcia Andrade", "Administradora", "Aprova peças e despacha pedidos"]].map(([e, n, p, d]) =>
           `<button type="button" class="perfil" data-acao="demo" data-email="${e}"><span><strong>${n}</strong><small>${p}. ${d}</small></span><span class="seta">${icone("seta", 18)}</span></button>`).join("")}
       </div>

@@ -20,8 +20,8 @@ Pix, entrega e banco de dados são simulados no navegador. Nenhuma compra é rea
 
 | Perfil | E-mail | Senha |
 | --- | --- | --- |
-| Cliente | marina@ciranda.app | ciranda123 |
-| Fornecedor | ana@ciranda.app | ciranda123 |
+| Cliente | ana@ciranda.app | ciranda123 |
+| Fornecedor | beatriz@ciranda.app | ciranda123 |
 | Administradora | lucia@ciranda.app | ciranda123 |
 
 No rodapé do site há um botão para restaurar os dados de demonstração.
