@@ -160,7 +160,7 @@ function telaCatalogo(u) {
   const naArara = Catalogo.disponiveis({}).filter(p => spec3d(p).forma === "top" && !(p.fotos && p.fotos.length)).slice(0, 10);
   pagina(u, `
     <section class="vitrine-topo" aria-label="Arara">
-      <div class="texto"><h1 aria-label="Roupa boa não acaba. Ela dá voltas.">${"Roupa boa não acaba. Ela dá voltas.".split(" ").map((w, i) => `<span class="pal" aria-hidden="true"><i style="--i:${i}">${w}</i></span>`).join(" ")}</h1><p>Toque numa peça da arara para ela virar para você.</p></div>
+      <div class="texto"><h1 aria-label="Roupa boa não acaba. Ela dá voltas.">${"Roupa boa não acaba. Ela dá voltas.".split(" ").map((w, i) => `<span class="pal" aria-hidden="true"><i style="--i:${i}">${w}</i></span>`).join(" ")}</h1><p>${tem3D() ? "Toque numa peça da arara para ela virar para você." : "Toque numa peça para ver os detalhes."}</p></div>
       <div class="selo-gira" aria-hidden="true"><svg class="txt" viewBox="0 0 120 120"><defs><path id="circ" d="M60 60m-48 0a48 48 0 1 1 96 0a48 48 0 1 1 -96 0"/></defs><text font-family="DM Mono,monospace" font-size="9.6" fill="#17130F"><textPath href="#circ" textLength="298" lengthAdjust="spacing">CADA PEÇA DÁ VOLTAS · CADA PEÇA DÁ VOLTAS · </textPath></text></svg><span class="meio"><span>${Catalogo.disponiveis({}).length}<small>peças na roda</small></span></span></div>
       <span class="dica">${naArara.length} de ${Catalogo.disponiveis({}).length} peças na arara</span>
       <div id="arara">${tem3D() ? "" : `<div class="sem3d">${naArara.map(p => `<a href="#/peca/${p.id}" style="aspect-ratio:4/5">${fotoPeca(p)}</a>`).join("")}</div>`}</div>

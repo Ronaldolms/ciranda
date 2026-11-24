@@ -19,7 +19,8 @@ def grava(nome, ext, conteudo, mini=None):
 
 css = grava("ciranda", "css", ler(A3D, "dist/tw.css") + ler(APP, "estilo.css") + ler(APP, "vida.css"), "css")
 j3d = grava("arara3d", "js", ler(A3D, "dist/ciranda3d.js"))
-app = grava("app", "js", '"use strict";{\n' + ler(APP, "dominio.js") + ler(APP, "arte.js") + ler(APP, "ui.js") + "\n}", "js")
+fotos_js = ler(APP, "fotos.js") if os.path.exists(os.path.join(APP, "fotos.js")) else ""
+app = grava("app", "js", fotos_js + '\n"use strict";{\n' + ler(APP, "dominio.js") + ler(APP, "arte.js") + ler(APP, "ui.js") + "\n}", "js")
 
 TIT = "Ciranda · brechó online"
 DESC = "Brechó online com arara 3D: cada peça mostra quantas voltas já deu e quanto de água e carbono deixou de ser gasto. MVP acadêmico, CEUB 2026."
@@ -52,5 +53,6 @@ open(os.path.join(S, "index.html"), "w", encoding="utf-8").write(f"""<!DOCTYPE h
 """)
 shutil.copy(os.path.join(APP, "favicon.svg"), S)
 for a in os.listdir(EST):
-    shutil.copy(os.path.join(EST, a), S)
+    if os.path.isfile(os.path.join(EST, a)): shutil.copy(os.path.join(EST, a), S)
+if os.path.isdir(os.path.join(EST, "fotos")): shutil.copytree(os.path.join(EST, "fotos"), os.path.join(S, "assets/fotos"))
 print("site/ gerado:", css, j3d, app)

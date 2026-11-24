@@ -66,6 +66,8 @@ python3 scripts/build.py
 
 O script junta os arquivos de `src/`, minifica (se o esbuild estiver instalado em `src/arara3d/node_modules`) e grava `site/`.
 
+As fotos das peças de demonstração já vêm renderizadas em `src/estatico/fotos/`, para o site funcionar mesmo em navegador sem WebGL. Se mudar as peças ou os modelos 3D, gere as fotos de novo com `python3 scripts/fotos.py` e rode o build outra vez.
+
 ## Créditos
 
 - Arara 3D: componente [Clothes Rack](https://ui.dimaac.com/components/clothes-rack), de DiMaac UI. O código-fonte do componente não está neste repositório; veja `src/arara3d/README.md`.

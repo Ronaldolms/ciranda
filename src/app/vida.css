@@ -183,3 +183,4 @@ article.peca:hover .foto img.f3d{transform:scale(1.05)}
   main#conteudo{padding-bottom:70px}
 }
 :root{color-scheme:light}
+.sem3d{padding:40px 28px 34px}.sem3d a{border:1.5px solid var(--tinta);border-radius:14px;overflow:hidden;background:#fff}

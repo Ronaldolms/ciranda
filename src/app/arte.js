@@ -212,6 +212,9 @@ const YAW = [0, 1.05, Math.PI];
 function fotoPeca(peca, vista = 0, opts = {}) {
   const alt = (peca.titulo || "").replace(/"/g, "&quot;");
   if (peca.fotos && peca.fotos.length) return `<span class="palco" style="display:block;width:100%;height:100%"><img class="foto-real" src="${peca.fotos[Math.min(vista, peca.fotos.length - 1)]}" alt="${alt}"></span>`;
+  // foto já renderizada e publicada junto com o site: não depende de WebGL nem gasta processamento
+  const pronta = (window.CIRANDA_FOTOS || {})[JSON.stringify(spec3d(peca)) + "|" + (YAW[vista] || 0)];
+  if (pronta) return `<span class="palco" style="display:block;width:100%;height:100%"><img class="f3d" loading="lazy" decoding="async" alt="${alt}" src="/assets/fotos/${pronta}"></span>`;
   if (!tem3D()) return `<span class="palco" style="display:block;width:100%;height:100%">${arteRoupa(peca, vista, { semEtiqueta: true, fundo: "none" })}</span>`;
   const s = JSON.stringify(spec3d(peca)).replace(/"/g, "&quot;");
   return `<span class="palco" style="display:block;width:100%;height:100%"><img class="f3d" alt="${alt}" data-s="${s}" data-yaw="${YAW[vista] || 0}" data-w="${opts.w || (innerWidth < 700 ? 360 : 480)}"></span>`;
@@ -313,3 +316,5 @@ function qrSvg(texto) {
   return `<svg viewBox="0 0 ${N} ${N}" width="100%" height="100%" role="img" aria-label="QR Code Pix de demonstração"><g fill="#14161B">${r}</g>${finder(0, 0)}${finder(N - 7, 0)}${finder(0, N - 7)}
     <g transform="translate(${N / 2 - 3.4} ${N / 2 - 3.4})"><rect width="6.8" height="6.8" rx="1.4" fill="#fff"/><g transform="translate(.5 .5) scale(.145)"><circle cx="14.5" cy="14.5" r="10" fill="none" stroke="#111" stroke-width="5" pathLength="63"/></g></g></svg>`;
 }
+
+window.CirandaDev = { spec3d, YAW, pecas: () => db.pecas };
