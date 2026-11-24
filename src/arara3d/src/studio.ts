@@ -159,19 +159,20 @@ export function disponivel() { return !!estudio(); }
 export function foto(spec: Spec3D, yaw = 0, w = 480, h = 600): string | null {
   const k = chave(spec) + "|" + yaw + "|" + w; const tem = fotos.get(k); if (tem) return tem;
   const o = objeto(spec); if (!o) return null;
-  try { const url = desenhar(o, yaw, w, h).toDataURL("image/webp", 0.9); fotos.set(k, url); return url; } catch (e) { return null; }
+  try { const url = desenhar(o, yaw, w, h).toDataURL("image/webp", 0.82); fotos.set(k, url); return url; } catch (e) { return null; }
 }
 // Visor giratório: arraste para girar. Desenha num canvas 2D da página a partir do estúdio.
 export function visor(alvo: HTMLCanvasElement, spec: Spec3D) {
   const o = objeto(spec); if (!o) return null;
   const ctx = alvo.getContext("2d")!; let yaw = 0.5, vel = 0, meta: number | null = 0, vivo = true, arr = false, x0 = 0, ult = performance.now(), parado = 0;
   const calmo = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const pintar = () => { const r = alvo.getBoundingClientRect(); const dpr = Math.min(devicePixelRatio || 1, 2); const w = Math.max(2, Math.round(r.width * dpr)), h = Math.max(2, Math.round(r.height * dpr));
+  const pintar = () => { const r = alvo.getBoundingClientRect(); const dpr = Math.min(devicePixelRatio || 1, 1.5); const w = Math.max(2, Math.round(r.width * dpr)), h = Math.max(2, Math.round(r.height * dpr));
     if (alvo.width !== w || alvo.height !== h) { alvo.width = w; alvo.height = h; } const src = desenhar(o, yaw, w, h); ctx.clearRect(0, 0, w, h); ctx.drawImage(src, 0, 0); };
-  const quadro = (t: number) => { if (!vivo || !alvo.isConnected) { vivo = false; return; } const dt = Math.min(0.05, (t - ult) / 1000); ult = t; let mexeu = false;
+  let naTela = true, par = false; const io = new IntersectionObserver((r) => { naTela = r[0].isIntersecting; }); io.observe(alvo);
+  const quadro = (t: number) => { if (!vivo || !alvo.isConnected) { vivo = false; io.disconnect(); return; } if (document.hidden || !naTela) { ult = t; requestAnimationFrame(quadro); return; } const dt = Math.min(0.05, (t - ult) / 1000); ult = t; let mexeu = false;
     if (meta !== null) { const d = meta - yaw; if (Math.abs(d) > 0.002) { yaw += d * Math.min(1, dt * 7); mexeu = true; } else { yaw = meta; meta = null; mexeu = true; } }
     else if (!arr && Math.abs(vel) > 0.01) { yaw += vel * dt; vel *= Math.pow(0.04, dt); mexeu = true; }
-    else if (!arr && !calmo) { parado += dt; if (parado > 2.5) { yaw += dt * 0.35; mexeu = true; } }
+    else if (!arr && !calmo) { parado += dt; if (parado > 2.5) { yaw += dt * 0.35; par = !par; mexeu = par; } }
     if (mexeu || arr) pintar(); requestAnimationFrame(quadro); };
   alvo.style.touchAction = "pan-y"; alvo.style.cursor = "grab";
   alvo.addEventListener("pointerdown", (e) => { arr = true; meta = null; x0 = e.clientX; vel = 0; parado = 0; alvo.setPointerCapture(e.pointerId); alvo.style.cursor = "grabbing"; });

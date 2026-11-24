@@ -217,19 +217,41 @@ function fotoPeca(peca, vista = 0, opts = {}) {
   return `<span class="palco" style="display:block;width:100%;height:100%"><img class="f3d" alt="${alt}" data-s="${s}" data-yaw="${YAW[vista] || 0}" data-w="${opts.w || 480}"></span>`;
 }
 const miniRoupa = (peca) => fotoPeca(peca, 0, { w: 200 });
-// preenche as fotos aos poucos, para a tela aparecer antes de o estúdio terminar
-let _fila3d = false;
-function preencher3D() {
-  if (_fila3d || !tem3D()) return; _fila3d = true;
-  const passo = () => {
-    const img = document.querySelector("img.f3d:not([src])");
-    if (!img) { _fila3d = false; return; }
-    const w = Number(img.dataset.w) || 480;
-    const url = window.Ciranda3D.foto(JSON.parse(img.dataset.s), Number(img.dataset.yaw) || 0, w, Math.round(w * 1.25));
+// Fotos 3D sem travar a tela: só renderiza o que está perto de aparecer, uma por vez
+// e nos intervalos livres do navegador. O resultado fica guardado para a próxima visita.
+const CH_FOTOS = "ciranda-fotos-v2";
+let _cacheFotos = {}; try { _cacheFotos = JSON.parse(localStorage.getItem(CH_FOTOS) || "{}"); } catch (e) {}
+let _salvaFotos = 0;
+function guardarFotos() {
+  clearTimeout(_salvaFotos);
+  _salvaFotos = setTimeout(() => { try { localStorage.setItem(CH_FOTOS, JSON.stringify(_cacheFotos)); } catch (e) { _cacheFotos = {}; try { localStorage.removeItem(CH_FOTOS); } catch (e2) {} } }, 1200);
+}
+const _fila = []; let _rodando = false;
+const _livre = window.requestIdleCallback ? (f) => requestIdleCallback(f, { timeout: 250 }) : (f) => setTimeout(f, 30);
+function _proxima() {
+  const img = _fila.shift();
+  if (!img) { _rodando = false; return; }
+  if (img.isConnected && !img.src) {
+    const w = Number(img.dataset.w) || 480, k = img.dataset.s + "|" + img.dataset.yaw + "|" + w;
+    let url = _cacheFotos[k];
+    if (!url) { url = window.Ciranda3D.foto(JSON.parse(img.dataset.s), Number(img.dataset.yaw) || 0, w, Math.round(w * 1.25)); if (url) { _cacheFotos[k] = url; guardarFotos(); } }
     if (url) img.src = url; else img.removeAttribute("class");
-    requestAnimationFrame(passo);
-  };
-  requestAnimationFrame(passo);
+  }
+  _livre(_proxima);
+}
+const _olhoFoto = ("IntersectionObserver" in window) ? new IntersectionObserver((es) => es.forEach(e => {
+  if (!e.isIntersecting) return; _olhoFoto.unobserve(e.target); _fila.push(e.target);
+  if (!_rodando) { _rodando = true; _livre(_proxima); }
+}), { rootMargin: "350px 0px" }) : null;
+function preencher3D() {
+  if (!tem3D()) return;
+  document.querySelectorAll("img.f3d:not([src]):not([data-o])").forEach(img => {
+    img.dataset.o = 1; img.decoding = "async";
+    const w = Number(img.dataset.w) || 480, pronto = _cacheFotos[img.dataset.s + "|" + img.dataset.yaw + "|" + w];
+    if (pronto) img.src = pronto;                       // já renderizada antes: aparece na hora
+    else if (_olhoFoto) _olhoFoto.observe(img);
+    else { _fila.push(img); if (!_rodando) { _rodando = true; _livre(_proxima); } }
+  });
 }
 function nFotos(peca) { return peca.fotos && peca.fotos.length ? peca.fotos.length : 3; }
 // cartões aparecem conforme entram na tela
@@ -237,7 +259,8 @@ const _olho = ("IntersectionObserver" in window) ? new IntersectionObserver((es)
 function revelar() {
   document.querySelectorAll(".revela:not([data-r])").forEach((el, i) => { el.dataset.r = 1; el.style.setProperty("--d", (i % 4) * 0.07 + "s"); if (_olho) _olho.observe(el); else el.classList.add("visto"); });
 }
-new MutationObserver(() => { preencher3D(); revelar(); }).observe(document.documentElement, { childList: true, subtree: true });
+let _mutou = false;
+new MutationObserver(() => { if (_mutou) return; _mutou = true; requestAnimationFrame(() => { _mutou = false; preencher3D(); revelar(); }); }).observe(document.documentElement, { childList: true, subtree: true });
 
 // --- ícones (traço único 1.75)
 const IC = {

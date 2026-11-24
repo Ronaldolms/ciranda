@@ -18,5 +18,5 @@ Este pacote gera `dist/ciranda3d.js`, que expõe `window.Ciranda3D` com:
 A arara e os modelos de camiseta, moletom e camisa vêm do componente Clothes Rack, de DiMaac UI. A página do componente não informa a licença, então o código-fonte dele não foi incluído. Para recompilar:
 
 1. Instale o componente pelo registro dele (https://ui.dimaac.com/components/clothes-rack) em `src/dimaac/`.
-2. Aplique as adaptações do Ciranda: textos da interface em português e dois tipos de estampa a mais em `garment.ts` (`stripes` e `jacket`).
+2. Aplique as adaptações do Ciranda: textos da interface em português e dois tipos de estampa a mais em `garment.ts` (`stripes` e `jacket`) e limite de 1,5 na densidade de pixels do renderizador.
 3. Rode `sh build.sh`.
