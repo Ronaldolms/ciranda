@@ -1,0 +1,1 @@
+{"name": "Ciranda", "short_name": "Ciranda", "start_url": "/", "display": "standalone", "background_color": "#FFD21F", "theme_color": "#FFD21F", "icons": [{"src": "/icone-512.png", "sizes": "512x512", "type": "image/png"}, {"src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml"}]}

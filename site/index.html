@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ciranda · brechó online</title>
+<meta name="description" content="Brechó online com arara 3D: cada peça mostra quantas voltas já deu e quanto de água e carbono deixou de ser gasto. MVP acadêmico, CEUB 2026.">
+<meta name="theme-color" content="#FFD21F">
+<meta name="robots" content="noindex">
+<meta property="og:type" content="website"><meta property="og:title" content="Ciranda · brechó online">
+<meta property="og:description" content="Brechó online com arara 3D: cada peça mostra quantas voltas já deu e quanto de água e carbono deixou de ser gasto. MVP acadêmico, CEUB 2026."><meta property="og:image" content="/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/ciranda.9ed57a7f.css">
+<link rel="preload" href="/assets/arara3d.36ec5973.js" as="script"><link rel="preload" href="/assets/app.9990158b.js" as="script">
+</head>
+<body>
+<div id="app"></div>
+<div class="toasts" role="status" aria-live="polite" id="toasts"></div>
+<button class="bastidores-bt" id="btBast" type="button" aria-controls="bastidores" aria-expanded="false"><span class="ponto" aria-hidden="true"></span> Bastidores</button>
+<aside class="bastidores" id="bastidores" aria-label="Bastidores: mensagens entre objetos" aria-hidden="true">
+  <header><div><h2>Bastidores</h2><p>Mensagens entre fronteira, controle e entidades, na ordem em que acontecem. É o diagrama de sequência rodando de verdade.</p></div>
+    <div style="display:flex;gap:6px"><button class="fechar" type="button" data-acao="limpar-bast">Limpar</button><button class="fechar" type="button" data-acao="fechar-bast">Fechar</button></div></header>
+  <ol id="logBast"></ol>
+</aside>
+<noscript><p style="padding:24px;font-family:sans-serif">O Ciranda precisa de JavaScript para funcionar.</p></noscript>
+<script defer src="/assets/arara3d.36ec5973.js"></script>
+<script defer src="/assets/app.9990158b.js"></script>
+</body>
+</html>
