@@ -178,7 +178,7 @@ function telaCatalogo(u) {
     <div id="grade">${gradeHtml(u)}</div>`);
   if (tem3D() && naArara.length) {
     const itens = naArara.map(p => Object.assign({ name: `${p.titulo} · ${brl(p.preco)}` }, spec3d(p).top));
-    try { desmontarArara = window.Ciranda3D.arara($("#arara"), itens, (i) => ir(`#/peca/${naArara[i].id}`), { size: innerWidth < 700 ? 0.42 : 0.56, gap: innerWidth < 700 ? 4 : 14 }); } catch (e) {}
+    try { desmontarArara = window.Ciranda3D.arara($("#arara"), itens, (i) => ir(`#/peca/${naArara[i].id}`), { size: innerWidth < 700 ? 0.42 : 0.56, gap: innerWidth < 700 ? 4 : 14, showCaption: innerWidth >= 700, breeze: matchMedia('(hover:none)').matches ? 0 : 0.5 }); } catch (e) {}
   }
 }
 function arrastar(el) {

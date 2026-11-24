@@ -24,12 +24,13 @@ app = grava("app", "js", '"use strict";{\n' + ler(APP, "dominio.js") + ler(APP, 
 TIT = "Ciranda · brechó online"
 DESC = "Brechó online com arara 3D: cada peça mostra quantas voltas já deu e quanto de água e carbono deixou de ser gasto. MVP acadêmico, CEUB 2026."
 open(os.path.join(S, "index.html"), "w", encoding="utf-8").write(f"""<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{TIT}</title>
 <meta name="description" content="{DESC}">
+<meta name="color-scheme" content="light only">
 <meta name="theme-color" content="#FFD21F">
 <meta name="robots" content="noindex">
 <meta property="og:type" content="website"><meta property="og:title" content="{TIT}">

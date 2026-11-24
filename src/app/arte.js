@@ -214,45 +214,59 @@ function fotoPeca(peca, vista = 0, opts = {}) {
   if (peca.fotos && peca.fotos.length) return `<span class="palco" style="display:block;width:100%;height:100%"><img class="foto-real" src="${peca.fotos[Math.min(vista, peca.fotos.length - 1)]}" alt="${alt}"></span>`;
   if (!tem3D()) return `<span class="palco" style="display:block;width:100%;height:100%">${arteRoupa(peca, vista, { semEtiqueta: true, fundo: "none" })}</span>`;
   const s = JSON.stringify(spec3d(peca)).replace(/"/g, "&quot;");
-  return `<span class="palco" style="display:block;width:100%;height:100%"><img class="f3d" alt="${alt}" data-s="${s}" data-yaw="${YAW[vista] || 0}" data-w="${opts.w || 480}"></span>`;
+  return `<span class="palco" style="display:block;width:100%;height:100%"><img class="f3d" alt="${alt}" data-s="${s}" data-yaw="${YAW[vista] || 0}" data-w="${opts.w || (innerWidth < 700 ? 360 : 480)}"></span>`;
 }
 const miniRoupa = (peca) => fotoPeca(peca, 0, { w: 200 });
-// Fotos 3D sem travar a tela: só renderiza o que está perto de aparecer, uma por vez
-// e nos intervalos livres do navegador. O resultado fica guardado para a próxima visita.
-const CH_FOTOS = "ciranda-fotos-v2";
-let _cacheFotos = {}; try { _cacheFotos = JSON.parse(localStorage.getItem(CH_FOTOS) || "{}"); } catch (e) {}
-let _salvaFotos = 0;
-function guardarFotos() {
-  clearTimeout(_salvaFotos);
-  _salvaFotos = setTimeout(() => { try { localStorage.setItem(CH_FOTOS, JSON.stringify(_cacheFotos)); } catch (e) { _cacheFotos = {}; try { localStorage.removeItem(CH_FOTOS); } catch (e2) {} } }, 1200);
-}
+// Fotos 3D sem travar a tela: só renderiza o que está perto de aparecer, uma por vez,
+// nunca durante a rolagem, e a codificação da imagem fica fora da linha principal.
+// As fotos prontas ficam guardadas no IndexedDB, então a segunda visita não renderiza nada.
+try { localStorage.removeItem("ciranda-fotos-v2"); } catch (e) {}
+const V_FOTOS = "v3";
+const _urls = new Map();
+let _bd = null;
+try {
+  const ped = indexedDB.open("ciranda-fotos", 1);
+  ped.onupgradeneeded = () => ped.result.createObjectStore("fotos");
+  ped.onsuccess = () => { _bd = ped.result; preencher3D(); };
+} catch (e) {}
+const _lerBd = (k) => new Promise((res) => { if (!_bd) return res(null); try { const r = _bd.transaction("fotos").objectStore("fotos").get(k); r.onsuccess = () => res(r.result || null); r.onerror = () => res(null); } catch (e) { res(null); } });
+const _gravarBd = (k, blob) => { if (!_bd) return; try { _bd.transaction("fotos", "readwrite").objectStore("fotos").put(blob, k); } catch (e) {} };
+const _chaveFoto = (img) => V_FOTOS + "|" + img.dataset.s + "|" + img.dataset.yaw + "|" + img.dataset.w;
+let _rolando = 0;
+addEventListener("scroll", () => { _rolando = performance.now(); }, { passive: true });
+addEventListener("touchmove", () => { _rolando = performance.now(); }, { passive: true });
 const _fila = []; let _rodando = false;
-const _livre = window.requestIdleCallback ? (f) => requestIdleCallback(f, { timeout: 250 }) : (f) => setTimeout(f, 30);
-function _proxima() {
+const _livre = window.requestIdleCallback ? (f) => requestIdleCallback(f, { timeout: 400 }) : (f) => setTimeout(f, 40);
+async function _proxima() {
+  if (performance.now() - _rolando < 180) return setTimeout(_proxima, 120);   // espera a rolagem parar
   const img = _fila.shift();
   if (!img) { _rodando = false; return; }
-  if (img.isConnected && !img.src) {
-    const w = Number(img.dataset.w) || 480, k = img.dataset.s + "|" + img.dataset.yaw + "|" + w;
-    let url = _cacheFotos[k];
-    if (!url) { url = window.Ciranda3D.foto(JSON.parse(img.dataset.s), Number(img.dataset.yaw) || 0, w, Math.round(w * 1.25)); if (url) { _cacheFotos[k] = url; guardarFotos(); } }
+  if (img.isConnected && !img.getAttribute("src")) {
+    const k = _chaveFoto(img); let url = _urls.get(k);
+    if (!url) {
+      let blob = await _lerBd(k);
+      if (!blob) { const w = Number(img.dataset.w) || 480; blob = await window.Ciranda3D.fotoBlob(JSON.parse(img.dataset.s), Number(img.dataset.yaw) || 0, w, Math.round(w * 1.25)); if (blob) _gravarBd(k, blob); }
+      if (blob) { url = URL.createObjectURL(blob); _urls.set(k, url); }
+    }
     if (url) img.src = url; else img.removeAttribute("class");
   }
   _livre(_proxima);
 }
+const _enfileirar = (img) => { _fila.push(img); if (!_rodando) { _rodando = true; _livre(_proxima); } };
 const _olhoFoto = ("IntersectionObserver" in window) ? new IntersectionObserver((es) => es.forEach(e => {
-  if (!e.isIntersecting) return; _olhoFoto.unobserve(e.target); _fila.push(e.target);
-  if (!_rodando) { _rodando = true; _livre(_proxima); }
-}), { rootMargin: "350px 0px" }) : null;
+  if (!e.isIntersecting) return; _olhoFoto.unobserve(e.target); _enfileirar(e.target);
+}), { rootMargin: "300px 0px" }) : null;
 function preencher3D() {
   if (!tem3D()) return;
   document.querySelectorAll("img.f3d:not([src]):not([data-o])").forEach(img => {
     img.dataset.o = 1; img.decoding = "async";
-    const w = Number(img.dataset.w) || 480, pronto = _cacheFotos[img.dataset.s + "|" + img.dataset.yaw + "|" + w];
-    if (pronto) img.src = pronto;                       // já renderizada antes: aparece na hora
-    else if (_olhoFoto) _olhoFoto.observe(img);
-    else { _fila.push(img); if (!_rodando) { _rodando = true; _livre(_proxima); } }
+    const pronto = _urls.get(_chaveFoto(img));
+    if (pronto) img.src = pronto; else if (_olhoFoto) _olhoFoto.observe(img); else _enfileirar(img);
   });
 }
+// animações contínuas param quando saem da tela
+const _olhoAnim = ("IntersectionObserver" in window) ? new IntersectionObserver((es) => es.forEach(e => e.target.classList.toggle("fora", !e.isIntersecting))) : null;
+function vigiarAnim() { if (_olhoAnim) document.querySelectorAll(".fita:not([data-v]),.selo-gira:not([data-v])").forEach(el => { el.dataset.v = 1; _olhoAnim.observe(el); }); }
 function nFotos(peca) { return peca.fotos && peca.fotos.length ? peca.fotos.length : 3; }
 // cartões aparecem conforme entram na tela
 const _olho = ("IntersectionObserver" in window) ? new IntersectionObserver((es) => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("visto"); _olho.unobserve(e.target); } }), { rootMargin: "0px 0px -6% 0px" }) : null;
@@ -260,7 +274,7 @@ function revelar() {
   document.querySelectorAll(".revela:not([data-r])").forEach((el, i) => { el.dataset.r = 1; el.style.setProperty("--d", (i % 4) * 0.07 + "s"); if (_olho) _olho.observe(el); else el.classList.add("visto"); });
 }
 let _mutou = false;
-new MutationObserver(() => { if (_mutou) return; _mutou = true; requestAnimationFrame(() => { _mutou = false; preencher3D(); revelar(); }); }).observe(document.documentElement, { childList: true, subtree: true });
+new MutationObserver(() => { if (_mutou) return; _mutou = true; requestAnimationFrame(() => { _mutou = false; preencher3D(); revelar(); vigiarAnim(); }); }).observe(document.documentElement, { childList: true, subtree: true });
 
 // --- ícones (traço único 1.75)
 const IC = {

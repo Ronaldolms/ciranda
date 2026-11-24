@@ -40,6 +40,17 @@ function tecido(cor: string, padrao = "liso", rep = 6) {
   else if (padrao === "floral") { for (let i = 0; i < 9; i++) { const x = (i % 3) * 86 + 30 + ((i / 3) | 0) % 2 * 40, y = ((i / 3) | 0) * 86 + 40; for (let k = 0; k < 5; k++) { g.fillStyle = i % 2 ? "#F4E3C3" : clr; g.beginPath(); g.arc(x + 11 * Math.cos(k * 1.2566), y + 11 * Math.sin(k * 1.2566), 8, 0, 7); g.fill(); } g.fillStyle = esc; g.beginPath(); g.arc(x, y, 5, 0, 7); g.fill(); } }
   else if (padrao === "listras") { g.fillStyle = "#F3F0E8"; for (let y = 0; y < 256; y += 32) g.fillRect(0, y, 256, 14); }
   else if (padrao === "linho" || padrao === "lona") { g.strokeStyle = esc; g.globalAlpha = 0.18; for (let y = 0; y < 256; y += 4) { g.beginPath(); g.moveTo(0, y); g.lineTo(256, y); g.stroke(); } for (let x = 0; x < 256; x += 4) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 256); g.stroke(); } g.globalAlpha = 1; }
+  // trama do tecido: fios cruzados (tela), diagonal (sarja do jeans) ou colunas de malha (tricô)
+  g.lineWidth = 1;
+  if (padrao === "jeans") { g.globalAlpha = 0.34; g.strokeStyle = esc; for (let i = -256; i < 512; i += 5) { g.beginPath(); g.moveTo(i + 2.5, 0); g.lineTo(i + 258.5, 256); g.stroke(); }
+    g.globalAlpha = 0.16; g.strokeStyle = "#ffffff"; for (let y = 0; y < 256; y += 3) { g.beginPath(); g.moveTo(0, y); g.lineTo(256, y); g.stroke(); } }
+  else if (padrao === "trico") { for (let x = 0; x < 256; x += 16) { g.globalAlpha = 0.3; g.strokeStyle = esc; g.lineWidth = 2; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 256); g.stroke();
+      g.globalAlpha = 0.22; g.strokeStyle = clr; g.lineWidth = 1.5; for (let y = 0; y < 256; y += 8) { g.beginPath(); g.moveTo(x + 2, y); g.lineTo(x + 8, y + 6); g.lineTo(x + 14, y); g.stroke(); } } g.lineWidth = 1; }
+  else if (padrao !== "couro") { g.globalAlpha = padrao === "linho" || padrao === "lona" ? 0.26 : 0.13;
+    for (let y = 0; y < 256; y += 4) { g.strokeStyle = (y / 4) % 2 ? esc : clr; g.beginPath(); g.moveTo(0, y + 0.5); g.lineTo(256, y + 0.5); g.stroke(); }
+    for (let x = 0; x < 256; x += 4) { g.strokeStyle = (x / 4) % 2 ? clr : esc; g.beginPath(); g.moveTo(x + 0.5, 0); g.lineTo(x + 0.5, 256); g.stroke(); } }
+  else { g.globalAlpha = 0.25; g.strokeStyle = esc; let r = 11; for (let i = 0; i < 90; i++) { r = (r * 16807) % 2147483647; const x = r % 256, y = (r >> 8) % 256; g.beginPath(); g.arc(x, y, 5 + (r % 7), 0, 7); g.stroke(); } }
+  g.globalAlpha = 1;
   // grão fino em todo tecido
   const d = g.getImageData(0, 0, 256, 256); let s = 7;
   for (let i = 0; i < d.data.length; i += 4) { s = (s * 16807) % 2147483647; const n = ((s % 23) - 11) * (padrao === "couro" ? 0.5 : 1); d.data[i] += n; d.data[i + 1] += n; d.data[i + 2] += n; }
@@ -50,7 +61,7 @@ function tecido(cor: string, padrao = "liso", rep = 6) {
 function pano(cor: string, padrao?: string, rep = 6) {
   const map = tecido(cor, padrao, rep);
   const couro = padrao === "couro";
-  return new THREE.MeshPhysicalMaterial({ map, color: couro ? 0xd0d0d0 : 0xb4b4b4, bumpMap: map, bumpScale: couro ? 0.4 : 0.5, roughness: couro ? 0.5 : 0.95, clearcoat: couro ? 0.25 : 0, clearcoatRoughness: 0.5,
+  return new THREE.MeshPhysicalMaterial({ map, color: couro ? 0xd0d0d0 : 0xb4b4b4, bumpMap: map, bumpScale: couro ? 0.6 : 1.1, roughness: couro ? 0.5 : 0.95, clearcoat: couro ? 0.25 : 0, clearcoatRoughness: 0.5,
     envMapIntensity: couro ? 0.7 : 0.5, sheen: couro ? 0 : 0.25, sheenRoughness: 0.8, sheenColor: new THREE.Color(mix(cor, "#ffffff", 0.3)), side: THREE.DoubleSide });
 }
 const cromo = () => new THREE.MeshStandardMaterial({ color: 0xd9dbe0, metalness: 1, roughness: 0.22 });
@@ -160,6 +171,16 @@ export function foto(spec: Spec3D, yaw = 0, w = 480, h = 600): string | null {
   const k = chave(spec) + "|" + yaw + "|" + w; const tem = fotos.get(k); if (tem) return tem;
   const o = objeto(spec); if (!o) return null;
   try { const url = desenhar(o, yaw, w, h).toDataURL("image/webp", 0.82); fotos.set(k, url); return url; } catch (e) { return null; }
+}
+// Versão que não trava a tela: desenha e deixa o navegador codificar a imagem fora da linha principal.
+let webp: boolean | null = null;
+export function fotoBlob(spec: Spec3D, yaw = 0, w = 480, h = 600): Promise<Blob | null> {
+  const o = objeto(spec); if (!o) return Promise.resolve(null);
+  try {
+    const c = desenhar(o, yaw, w, h);
+    if (webp === null) webp = c.toDataURL("image/webp").startsWith("data:image/webp");
+    return new Promise((res) => c.toBlob((b) => res(b), webp ? "image/webp" : "image/png", 0.82));
+  } catch (e) { return Promise.resolve(null); }
 }
 // Visor giratório: arraste para girar. Desenha num canvas 2D da página a partir do estúdio.
 export function visor(alvo: HTMLCanvasElement, spec: Spec3D) {

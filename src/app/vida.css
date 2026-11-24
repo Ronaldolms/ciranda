@@ -171,3 +171,15 @@ article.peca>div:not([class]):last-child{padding-bottom:14px}
 article.peca:hover .foto img.f3d{transform:scale(1.05)}
 .fita-in,.selo-gira svg.txt{will-change:transform}
 .vitrine-topo{contain:layout paint}
+
+/* ---- arara: textos legíveis e painel da peça sem sobreposição */
+#arara h3{font:800 clamp(1.05rem,3.4vw,1.5rem)/1.15 var(--serif)!important;letter-spacing:-.03em!important;max-width:24ch;margin:0 auto 4px!important}
+#arara [role="dialog"] .bottom-\[5\%\]{bottom:14px!important;gap:6px!important}
+.fora .fita-in,.fora svg.txt{animation-play-state:paused}
+/* ---- Bastidores compacto no celular, sem cobrir conteúdo */
+@media (max-width:820px){
+  .bastidores-bt{width:42px;height:42px;padding:0;justify-content:center;font-size:0;gap:0;border-radius:50%;right:10px;bottom:calc(66px + env(safe-area-inset-bottom));background:var(--tinta);border-color:var(--tinta)}
+  .bastidores-bt .ponto{width:10px;height:10px;background:var(--sol)}
+  main#conteudo{padding-bottom:70px}
+}
+:root{color-scheme:light}
